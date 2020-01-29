@@ -17,3 +17,5 @@ func NewConfig() *Config {
 		Store:    store.NewConfig(),
 	}
 }
+
+//./migrate -path migrations -database "postgres://localhost/restapi_dev?sslmode=disable" up

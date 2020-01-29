@@ -36,7 +36,7 @@ func (s *APIServer) Start() error {
 	s.configugerRouter()
 
 	if err := s.configugerStore(); err != nil {
-		return nil
+		return err
 	}
 
 	s.logger.Info("starting api server")
