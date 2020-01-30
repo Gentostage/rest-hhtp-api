@@ -18,4 +18,5 @@ func NewConfig() *Config {
 	}
 }
 
-//./migrate -path migrations -database "postgres://localhost/restapi_dev?sslmode=disable" up
+//../migrate -path migrations -database "postgres://localhost/restapi_dev?sslmode=disable&user=postgres&password=12345" up
+//../migrate -path migrations -database "postgres://localhost/restapi_test?sslmode=disable&user=postgres&password=12345" up
