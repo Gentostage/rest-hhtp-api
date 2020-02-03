@@ -37,13 +37,13 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
-	s.router.HandleFunc("/session", s.handleSessionCreate().Methods("POST"))
+	s.router.HandleFunc("/sessions", s.handleSessionCreate()).Methods("GET")
 }
 
 func (s *server) handleUsersCreate() http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
-		Password string `json: "password"`
+		Password string `json:"password"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -67,10 +67,10 @@ func (s *server) handleUsersCreate() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleSessionCreate() http.HandleFunc {
+func (s *server) handleSessionCreate() http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
-		Password string `json: "password"`
+		Password string `json:"password"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +85,7 @@ func (s *server) handleSessionCreate() http.HandleFunc {
 			return
 		}
 		s.respond(w, r, http.StatusOK, nil)
+		return
 	}
 }
 
