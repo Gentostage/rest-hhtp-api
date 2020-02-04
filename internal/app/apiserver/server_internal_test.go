@@ -11,12 +11,13 @@ import (
 
 	"github.com/WelchDragon/http-rest-api.git/internal/app/model"
 	"github.com/WelchDragon/http-rest-api.git/internal/app/store/teststore"
+	"github.com/gorilla/sessions"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestServer_HandleUsersCreate(t *testing.T) {
-	s := newServer(teststore.New())
+	s := newServer(teststore.New(),sessions.NewCookieStore([]byte("sec")))
 	testCases := []struct {
 		name         string
 		payload      interface{}
@@ -61,7 +62,7 @@ func TestServer_HandleSessionsCreate(t *testing.T) {
 	u := model.TestUser(t)
 	store := teststore.New()
 	store.User().Create(u)
-	s := newServer(store)
+	s := newServer(store,sessions.NewCookieStore([]byte("sec")))
 	testCases := []struct {
 		name         string
 		payload      interface{}
@@ -86,7 +87,7 @@ func TestServer_HandleSessionsCreate(t *testing.T) {
 				"email":    "invalid",
 				"password": u.Password,
 			},
-			expectedCode: http.StatusUnprocessableEntity,
+			expectedCode: http.StatusUnauthorized,
 		},
 		{
 			name: "invalid password",
@@ -94,7 +95,7 @@ func TestServer_HandleSessionsCreate(t *testing.T) {
 				"email":    u.Email,
 				"password": "invalid",
 			},
-			expectedCode: http.StatusUnprocessableEntity,
+			expectedCode: http.StatusUnauthorized,
 		},
 	}
 	for _, tc := range testCases {
