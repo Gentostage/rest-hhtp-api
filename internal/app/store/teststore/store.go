@@ -1,8 +1,9 @@
 package teststore
 
-import "github.com/WelchDragon/http-rest-api.git/internal/app/store"
-
-import "github.com/WelchDragon/http-rest-api.git/internal/app/model"
+import (
+	"github.com/WelchDragon/http-rest-api.git/internal/app/model"
+	"github.com/WelchDragon/http-rest-api.git/internal/app/store"
+)
 
 //Store ...
 type Store struct {
@@ -21,7 +22,7 @@ func (s *Store) User() store.UserRepository {
 	}
 	s.userReposiroty = &UserRepository{
 		store: s,
-		users: make(map[string]*model.User),
+		users: make(map[int]*model.User),
 	}
 	return s.userReposiroty
 }
