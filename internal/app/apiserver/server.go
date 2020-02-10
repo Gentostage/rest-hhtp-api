@@ -84,7 +84,7 @@ func (s *server) logRequest(next http.Handler) http.Handler {
 		next.ServeHTTP(rw, r)
 
 		logger.Infof(
-			"complited with %d in %v",
+			"complited with %d in %v %d",
 			rw.code,
 			http.StatusText(rw.code),
 			time.Now().Sub(start),
