@@ -10,7 +10,7 @@ migrate-dev:
 		migrate -path migrations -database "postgres://localhost/restapi_dev?sslmode=disable&user=postgres&password=12345" up
 
 .PHONY: migrate-test
-migrate-dev:
+migrate-test:
 		migrate -path migrations -database "postgres://localhost/restapi_test?sslmode=disable&user=postgres&password=12345" up
 
 .DEFAULT_GOAL := build
