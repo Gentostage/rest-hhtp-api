@@ -55,12 +55,13 @@ func (s *server) configureRouter() {
 	s.router.Use(s.serRequestID)
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
-	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
-	s.router.HandleFunc("/sessions", s.handleSessionCreate()).Methods("POST")
+	s.router.HandleFunc("/register", s.handleUsersCreate()).Methods("POST")
+	s.router.HandleFunc("/login", s.handleSessionCreate()).Methods("POST")
 
 	private := s.router.PathPrefix("/private").Subrouter()
 	private.Use(s.authenticateUser)
-	private.HandleFunc("/whoami", s.handleWhoami()).Methods("GET")
+	private.HandleFunc("/user", s.handleUserGet()).Methods("GET")
+	//private.HandleFunc("/user", s.handleUserUpdate()).Methods("POST")
 }
 
 func (s *server) serRequestID(next http.Handler) http.Handler {
@@ -115,7 +116,7 @@ func (s *server) authenticateUser(next http.Handler) http.Handler {
 	})
 }
 
-func (s *server) handleWhoami() http.HandlerFunc {
+func (s *server) handleUserGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*model.User))
 	}
