@@ -12,6 +12,9 @@ type User struct {
 	Email             string `json:"email"`
 	Password          string `json: "password, onitempty"`
 	EncryptedPassword string `json: "-"`
+	FullName          string `json: "fullname`
+	Avatar            string `json: "avatar"`
+	About             string `json: "about"`
 }
 
 //Validate ...
