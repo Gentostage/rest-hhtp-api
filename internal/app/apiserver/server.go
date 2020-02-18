@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	sessionName        = "WelchDragon"
+	sessionName        = "session-token"
 	ctxKeyUser  ctxKey = iota
 	ctxKeyRequestID
 )
