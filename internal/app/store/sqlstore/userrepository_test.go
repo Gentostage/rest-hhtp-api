@@ -9,6 +9,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestStore_UserRepository_UpdateUser(t *testing.T) {
+	db, teardown := sqlstore.TestDB(t, databaseURL)
+	defer teardown("users")
+	s := sqlstore.New(db)
+
+	id := 0
+	u1 := &model.User{}
+
+	err := s.User().UpdateUser(id, u1)
+	assert.Error(t, err)
+
+	u2 := model.TestUser(t)
+	s.User().Create(u2)
+
+	u1.FullName = "Vasya Pupkin"
+	u1.Avatar = "/link/image.jpg"
+	u1.About = "About..."
+
+	err = s.User().UpdateUser(u2.ID, u1)
+	assert.NoError(t, err)
+
+}
+
+func TestStore_UserRepository_GetUser(t *testing.T) {
+	db, teardown := sqlstore.TestDB(t, databaseURL)
+	defer teardown("users")
+	s := sqlstore.New(db)
+
+	id := 0
+
+	u, err := s.User().GetUser(id)
+	assert.EqualError(t, err, store.ErrRecordNorFound.Error())
+
+	u1 := model.TestUser(t)
+	s.User().Create(u1)
+
+	u, err = s.User().GetUser(u1.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, u)
+
+}
+
 //TestUserRepository_Create ...
 func TestUserRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDB(t, databaseURL)

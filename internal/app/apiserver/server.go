@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 )
 
 const (
-	sessionName        = "WelchDragon"
+	sessionName        = "session-token"
 	ctxKeyUser  ctxKey = iota
 	ctxKeyRequestID
 )
@@ -55,12 +56,13 @@ func (s *server) configureRouter() {
 	s.router.Use(s.serRequestID)
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
-	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
-	s.router.HandleFunc("/sessions", s.handleSessionCreate()).Methods("POST")
+	s.router.HandleFunc("/register", s.handleUsersCreate()).Methods("POST")
+	s.router.HandleFunc("/login", s.handleSessionCreate()).Methods("POST")
 
 	private := s.router.PathPrefix("/private").Subrouter()
 	private.Use(s.authenticateUser)
-	private.HandleFunc("/whoami", s.handleWhoami()).Methods("GET")
+	private.HandleFunc("/user", s.handleUserGet()).Methods("GET")
+	private.HandleFunc("/user", s.handleUserUpdate()).Methods("POST")
 }
 
 func (s *server) serRequestID(next http.Handler) http.Handler {
@@ -84,7 +86,7 @@ func (s *server) logRequest(next http.Handler) http.Handler {
 		next.ServeHTTP(rw, r)
 
 		logger.Infof(
-			"complited with %d in %v %d",
+			"completed with %d %s in %v",
 			rw.code,
 			http.StatusText(rw.code),
 			time.Now().Sub(start),
@@ -114,8 +116,33 @@ func (s *server) authenticateUser(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, u)))
 	})
 }
+func (s *server) handleUserUpdate() http.HandlerFunc {
+	type request struct {
+		Email    string `json:email`
+		About    string `json:about`
+		FullName string `json:full_name`
+		Avatar   string `json:avatar`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := &request{}
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+		}
+		fmt.Println(req)
+		u := r.Context().Value(ctxKeyUser).(*model.User)
+		u2 := &model.User{
+			FullName: req.FullName,
+			Avatar:   req.Avatar,
+			About:    req.About,
+			Email:    req.Email,
+		}
+		s.store.User().UpdateUser(u.ID, u2)
 
-func (s *server) handleWhoami() http.HandlerFunc {
+		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*model.User))
+	}
+}
+
+func (s *server) handleUserGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*model.User))
 	}
