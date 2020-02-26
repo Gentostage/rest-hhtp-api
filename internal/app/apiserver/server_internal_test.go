@@ -19,6 +19,56 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestServer_HandleUpdateUser(t *testing.T) {
+	u := model.TestUser(t)
+	store := teststore.New()
+	store.User().Create(u)
+	s := newServer(store, sessions.NewCookieStore([]byte("sec")))
+	testCases := []struct {
+		name         string
+		payload      interface{}
+		newUser      interface{}
+		expectedCode int
+	}{
+		{
+			name: "valid",
+			payload: map[string]string{
+				"id":       strconv.Itoa(u.ID),
+				"email":    u.Email,
+				"password": u.Password,
+			},
+			newUser: map[string]string{
+				"email":     "user@example.org",
+				"about":     "About ...",
+				"full_name": "Ивано Иван Иванович",
+				"avatar":    "/linc/url",
+			},
+			expectedCode: http.StatusOK,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			b := &bytes.Buffer{}
+			json.NewEncoder(b).Encode(tc.payload)
+			req, _ := http.NewRequest(http.MethodPost, "/login", b)
+			s.ServeHTTP(rec, req)
+
+			cookie := rec.Result().Cookies()[0].String()
+
+			json.NewEncoder(b).Encode(tc.newUser)
+
+			rec = httptest.NewRecorder()
+			req, _ = http.NewRequest(http.MethodPost, "/private/user", b)
+			req.Header.Set("Cookie", cookie)
+			s.ServeHTTP(rec, req)
+			assert.Equal(t, tc.expectedCode, rec.Code)
+		})
+	}
+
+}
+
 func TestServer_HandleGetUser(t *testing.T) {
 	u := model.TestUser(t)
 	store := teststore.New()
