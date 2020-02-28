@@ -10,3 +10,6 @@ type UserRepository interface {
 	GetUser(int) (*model.User, error)
 	UpdateUser(int, *model.User) error
 }
+
+type PostRepository interface {
+}
